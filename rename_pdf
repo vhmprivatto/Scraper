@@ -1,0 +1,37 @@
+import shutil
+import pdfplumber
+import os
+from glob import glob
+
+
+os.chdir(r'C:\a\b\c\prontuários')
+for pdf_list in glob('*.pdf'):
+   
+    with pdfplumber.open(pdf_list) as pdf:
+        first_page = pdf.pages[0]
+        first_page.extract_text()
+        
+    #Get the full name plus extra characters spaces until nem field 'Apelido'
+    name_start = first_page.extract_text().find('Nome Completo da Pessoa:') + 25
+    name_end = first_page.extract_text().find('Apelido (caso seja relevante):')
+
+    #Get the CPF plus extra characters spaces until nem field 'RG'
+    cpf_start = first_page.extract_text().find('CPF:') + 4
+    cpf_end = first_page.extract_text().find('RG')
+
+    name_extractor = first_page.extract_text()[name_start:name_end].replace('\n', '').title()
+    cpf_extractor = first_page.extract_text()[cpf_start:cpf_end].replace('\n', '').replace('.', '').replace('-', '')
+
+    file_ID = name_extractor + cpf_extractor + '.pdf'
+    print(file_ID)
+
+    original = r'C:/a/b/c/prontuários/' + pdf_list
+    renamed = r'C:/a/b/c/d/' + file_ID
+
+    print(pdf_list)
+
+    #Copy and rename pdf files
+    shutil.copyfile(original, renamed)
+    
+    #Delete older files
+    os.remove(r'C:/Users/Vitor/Desktop/prontuários/' + pdf_list)
