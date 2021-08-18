@@ -1,0 +1,121 @@
+from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait as wait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
+import time
+import pyautogui
+
+
+# Scroll down the page
+def scroll_shim(passed_in_driver, object):
+    x = object.location['x']
+    y = object.location['y']
+    scroll_by_coord = 'window.scrollTo(%s,%s);' % (
+        x,
+        y
+    )
+    scroll_nav_out_of_way = 'window.scrollBy(0, -100);'
+    passed_in_driver.execute_script(scroll_by_coord)
+    passed_in_driver.execute_script(scroll_nav_out_of_way)
+
+
+def element_finder_mover(element_to_be_find, driver):
+    # Scroll down the page to find and click in the element
+    element = wait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, element_to_be_find)))
+    if 'firefox' in driver.capabilities['browserName']:
+        scroll_shim(driver, element)
+    # scroll_shim is just scrolling it into view, you still need to hover over it to click using an action chain.
+    actions = ActionChains(driver)
+    actions.move_to_element(element)
+
+def wait_and_download():
+    # wait 15 seconds until the URL is fully downloaded
+    time.sleep(15)
+    
+    # move the mouse cursor to determined location (download button) and click
+    pyautogui.click(1810, 125)  # set different values to different screen sizes
+    
+    # wait 2 seconds
+    time.sleep(2)
+    
+    # use system key ENTER
+    pyautogui.press('enter')
+    
+    #wait 1.5 seconds
+    time.sleep(1.5)
+    
+    # use system command keys (control + w) to close current firefox tab
+    pyautogui.hotkey('ctrl', 'w')
+
+
+def element_finder_clicker(element_to_be_find, driver):
+    # Scroll down the page to find and click in the element
+    element = wait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, element_to_be_find)))
+    if 'firefox' in driver.capabilities['browserName']:
+        scroll_shim(driver, element)
+    # scroll_shim is just scrolling it into view, you still need to hover over it to click using an action chain.
+    actions = ActionChains(driver)
+    actions.move_to_element(element)
+    actions.click()
+    actions.perform()
+
+#######################
+###### Variables ######
+
+button_print_list = ['#botoes0 > a:nth-child(2)',
+'#botoes1 > a:nth-child(2)',
+'#botoes2 > a:nth-child(2)',
+'#botoes3 > a:nth-child(2)',
+'#botoes4 > a:nth-child(2)',
+'#botoes5 > a:nth-child(2)',
+'#botoes6 > a:nth-child(2)',
+'#botoes7 > a:nth-child(2)',
+'#botoes8 > a:nth-child(2)',
+'#botoes9 > a:nth-child(2)']
+
+
+# Use firefox to acess the website
+driver = webdriver.Firefox()  # Open the website
+driver.get('https://abcde')
+# Select the id box
+id_box = driver.find_element_by_name('usuario')
+# Send id information
+id_box.send_keys('username')
+# Find password box
+pass_box = driver.find_element_by_name('senha')
+# Send password
+pass_box.send_keys('password')
+# Find login button
+driver.find_element_by_class_name('conecta').click()
+
+# Scroll down the page to find and click in the element 'Prontuários' in the left list
+element_finder_clicker('#side-menu > li:nth-child(13) > a:nth-child(1)', driver)
+
+# Open link in the submenu
+driver.get('https://abcde/fghij')
+
+
+
+for i in range(2100):
+    for j in range(len(button_print_list)):
+        # find and click on the first print button
+        time.sleep(1)
+        element_finder_clicker(button_print_list[j], driver)
+
+        # find the click on the second print button
+        print_button = wait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.btn-modal-position-top'))).click()
+
+        # wait the URL to load then download the PDF and close tab
+        wait_and_download()
+        
+        # close button
+        time.sleep(0.5)
+        pyautogui.click(1772, 174)
+
+        
+
+    # find and click on 'next page button'
+    element_finder_clicker('#datatableProntuarioSocial_next > a:nth-child(1)', driver)
+    time.sleep(1)
+   
